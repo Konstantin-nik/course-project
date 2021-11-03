@@ -248,10 +248,10 @@ func main() {
 	fmt.Println("Welcome to the arena!")
 	fmt.Println("Today we have two players: Mage and Warrior!")
 	fmt.Println("Lets have a look to our Players: ")
-	var p1 Battle = &Mage{Health: 100.0, Mana: 0.0, Status: Status{Name: "None", Value: 0}}
+	var p1 Battle = &Mage{Health: 100.0, Mana: 0.0, Status: Status{Name: "Alive", Value: 0}}
 	fmt.Println("First Player: ")
 	p1.PrintStatus()
-	var p2 Battle = &Warrior{Health: 100.0, Armor: 5.0, Status: Status{Name: "None", Value: 0}}
+	var p2 Battle = &Warrior{Health: 100.0, Armor: 5.0, Status: Status{Name: "Alive", Value: 0}}
 	fmt.Println("Second Player: ")
 	p2.PrintStatus()
 	fmt.Println("\nFight!")
@@ -259,9 +259,9 @@ func main() {
 	var s2 Status = Status{Name: "None", Value: 0}
 	var name1, name2 string
 	for s1.Name != "dead" && s2.Name != "dead" {
-		s1, name1 = p1.DoDamage(p2, &Damage{Value: 10.0, Type: "fire", Power: 3})
+		s1, name1 = p1.DoDamage(p2, &Damage{Value: 10.0, Type: "fire", Power: 6})
 		fmt.Println("***********************************")
-		s2, name2 = p2.DoDamage(p1, &Damage{Value: 14.0, Type: "normal", Power: 0})
+		s2, name2 = p2.DoDamage(p1, &Damage{Value: 20.0, Type: "normal", Power: 0})
 		fmt.Println("***********************************")
 	}
 
@@ -280,4 +280,5 @@ func main() {
 			fmt.Printf("Warrior won\n")
 		}
 	}
+	fmt.Scan()
 }
