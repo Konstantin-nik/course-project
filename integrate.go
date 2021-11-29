@@ -5,30 +5,32 @@ import (
 	"math"
 )
 
-var (
-	x float64
-)
-
-func f(x float64) float64 {
-	return float64(math.Cos(math.Pow(x, 2)) / (1.0 + math.Pow(math.Log(x+1), 2)))
+func f(x float64, c2 chan float64) {
+	c2 <- float64(math.Cos(math.Pow(x, 2)) / (1.0 + math.Pow(math.Log(x+1), 2)))
 }
 
-func someFunc(i int, p int) float64 {
-	return f(2*(math.Cos(float64(2*i+1)*math.Pi/float64(2*p+2))) + 4)
+func someFunc(p int, c1 chan int, c2 chan float64) {
+	i := <-c1
+	go f(2*(math.Cos(float64(2*i+1)*math.Pi/float64(2*p+2)))+4, c2)
 }
 
-func fHaussa(p int) float64 {
+func fHaussa(p int, l chan float64) {
 	var ans float64 = 0
+	ch := make(chan int)
+	ca := make(chan float64)
 	for i := 0; i < p; i++ {
-		//
+		go someFunc(p, ch, ca)
+		ch <- i
+		ans += <-ca
 	}
-	return ans * math.Pi / float64(p)
+	l <- ans * math.Pi / float64(p)
 }
 
 func main() {
-	go fHaussa(1024)
-	go fHaussa(3)
+	l := make(chan float64)
+	go fHaussa(203207, l)
+	//fHaussa(3)
 
-	fmt.Scan(&x)
-	fmt.Print(f(x))
+	//fmt.Scan(&x)
+	fmt.Print(<-l)
 }
