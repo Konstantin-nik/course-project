@@ -1,30 +1,89 @@
 package main
 
-import (
-	"fmt"
-)
+// type Battle interface {
+// 	DoDamage(b Battle, d *Damage) (Status, string)
+// 	GetDamage(d *Damage) (Status, string)
+// 	PrintStatus()
+// 	UpdateStatus() int
+// 	isAlive() bool
+// }
+
+type Arena interface {
+	UpdateStatus()
+	GetResult() (a Battle)
+}
+
+type BattlePair struct {
+	b1, b2 Battle
+	status bool
+}
+
+func (bp *BattlePair) UpdateStatus() {
+	bp.status = bp.b1.IsAlive() && bp.b2.IsAlive()
+}
+
+func (bp *BattlePair) GetResult() (a Battle) {
+	if bp.b1.IsAlive() {
+		return bp.b1
+	} else if bp.b2.IsAlive() {
+		return bp.b2
+	} else {
+		return nil
+	}
+}
 
 type Battle interface {
-	DoDamage(b Battle, d *Damage) (Status, string)
-	GetDamage(d *Damage) (Status, string)
-	PrintStatus()
-	UpdateStatus() int
-	isAlive() bool
+	IsAlive() bool
+	GetDamage(d float64)
+	DoDamage(i interface{ GetDamage(d float64) })
 }
 
 type Status struct {
 	Name  string
-	Value int
+	Value []int
 }
 
+type Person struct {
+	Name   string
+	Health float64
+	Stat   Status
+}
+
+func (p *Person) IsAlive() bool {
+	return p.Health > 0
+}
+
+func (p *Person) GetDamage(d float64) {
+	if d > 0 {
+		p.Health -= d
+	}
+}
+
+type Warrior struct {
+	P      Person
+	Damage float64
+	Armor  float64
+	Range  float64
+	Flee   float64
+}
+
+func (w *Warrior) IsAlive() bool {
+	return w.P.IsAlive()
+}
+
+func (w *Warrior) GetDamage(d float64) {
+	w.P.GetDamage(d - w.Armor)
+}
+
+func (w *Warrior) DoDamage(i interface{ GetDamage(d float64) }) {
+	i.GetDamage((w.Damage + w.Range) * w.Flee)
+}
+
+/*
 type Damage struct {
 	Value float64
 	Type  string
 	Power int
-}
-
-type Human struct {
-	Name string
 }
 
 type Warrior struct {
@@ -282,3 +341,4 @@ func main() {
 	}
 	fmt.Scan()
 }
+*/
