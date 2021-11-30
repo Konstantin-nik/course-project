@@ -2,35 +2,60 @@ package main
 
 import (
 	"fmt"
+	"sync"
+	"time"
 )
 
-// func describe(i interface{}) {
-// 	fmt.Printf("(%v, %T)\n", i, i)
-// }
+var wg = sync.WaitGroup{}
 
-var (
-	player1 Battle = &Warrior{P: Person{Name: "player1", Health: 200}, Damage: 10,
-		Armor: 5, Range: 3, Flee: 0.69}
-	player2 Battle = &Warrior{P: Person{Name: "player2", Health: 200}, Damage: 11,
-		Armor: 5, Range: 2, Flee: 0.65}
-	arena Arena = &BattlePair{b1: player1, b2: player2}
-)
+func CircleBattle(l []*Battle, cb chan *Battle) {
+	for len(l) > 1 {
+		// fmt.Println("----------------------------")
+		// for _, lb := range l {
+		// 	fmt.Println(*lb)
+		// }
 
-func main() {
-	fmt.Println("Welcome to the arena!")
-	arena.StartBattle()
-	fmt.Print(arena.GetResult())
+		var b1, b2 *Battle
+		var a Arena
+		ch := make(chan *Battle, int(len(l)/2))
+		for len(l) > 1 {
+			l, b1 = l[:len(l)-1], l[len(l)-1]
+			l, b2 = l[:len(l)-1], l[len(l)-1]
+			a = &BattlePair{b1: *b1, b2: *b2}
+			wg.Add(1)
+			go a.Battle(ch)
+		}
+		wg.Wait()
+		close(ch)
+		for val := range ch {
+			if *val != nil {
+				l = append(l, val)
+			}
+		}
+	}
+	// fmt.Println("----------------------------")
+	// for _, lb := range l {
+	// 	fmt.Println(*lb)
+	// }
+	if len(l) == 0 {
+		cb <- nil
+		return
+	} else if len(l) == 1 {
+		cb <- l[0]
+		return
+	}
 }
 
 // Arena interface used for organising battles with multiple players.
 //
 // List of acceptable structures:
-// 		type BattlePair struct {}
-// .
+// 		• type BattlePair struct {}
+//
 type Arena interface {
 	StartBattle()
 	UpdateStatus()
 	GetResult() (a Battle)
+	Battle(bc chan *Battle)
 }
 
 type BattlePair struct {
@@ -61,11 +86,21 @@ func (bp *BattlePair) GetResult() (a Battle) {
 	}
 }
 
+func (bp *BattlePair) Battle(bc chan *Battle) {
+	// fmt.Println("11")
+	bp.StartBattle()
+	b := bp.GetResult()
+	time.Sleep(100 * time.Millisecond)
+	// fmt.Println("22")
+	bc <- &b
+	defer wg.Done()
+}
+
 // Battle interface used for battle skills.
 //
 // List of acceptable structures:
-// 		type Warrior struct {}
-// .
+// 		• type Warrior struct {}
+//
 type Battle interface {
 	IsAlive() bool
 	GetDamage(d float64)
@@ -121,3 +156,38 @@ func (w *Warrior) DoDamage(i interface{ GetDamage(d float64) }) {
 func (w *Warrior) String() string {
 	return w.P.String()
 }
+
+// func describe(i interface{}) {
+// 	fmt.Printf("(%v, %T)\n", i, i)
+// }
+
+// func makePlayer(name string, damage float64) *Battle {
+// 	var p Battle = &Warrior{P: Person{Name: name, Health: 200}, Damage: damage,
+// 		Armor: 5, Range: 3, Flee: 0.69}
+// 	return &p
+// }
+
+// var (
+// 	player1 Battle = &Warrior{P: Person{Name: "Hero 1", Health: 200}, Damage: 5,
+// 		Armor: 5, Range: 3, Flee: 0.69}
+// 	player2 Battle = &Warrior{P: Person{Name: "Hero 2", Health: 200}, Damage: 6,
+// 		Armor: 5, Range: 2.1, Flee: 0.68}
+// 	arena Arena = &BattlePair{b1: player1, b2: player2}
+// 	l     []*Battle
+// )
+
+// func main() {
+// 	v := make(chan *Battle)
+// 	l = append(l, &player1)
+// 	l = append(l, &player2)
+// 	l = append(l, makePlayer("Hero 3", 5))
+// 	l = append(l, makePlayer("Hero 4", 5))
+// 	l = append(l, makePlayer("Hero 5", 5))
+// 	l = append(l, makePlayer("Hero 6", 5))
+// 	l = append(l, makePlayer("Hero 7", 7))
+// 	go CircleBattle(l, v)
+// 	fmt.Println(*<-v)
+// 	//fmt.Println("Welcome to the arena!")
+// 	//arena.StartBattle()
+// 	//fmt.Print(arena.GetResult())
+// }
