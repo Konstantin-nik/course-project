@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Battle Server</title>
+    <link rel="stylesheet" href="/styles.css">
+    <!-- <style type="text/css">
+        .container {
+            width: 100%;
+            padding: 12px 20px;
+            margin: 8px 0;
+            display: inline-block;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+        }
+
+        body {
+            text-align: center;
+            position: relative;
+            left: 30%;
+            right: 30%;
+            max-width: 40%;
+        }
+    </style> -->
+</head>
+
+<body>
+    <div class="container">
+        <h2>Create new player</h2>
+        <form method="POST" action="addplayer">
+            <label>Name:</label><br>
+            <input type="text" name="name" /><br><br>
+            <label>Health:</label><br>
+            <input type="number" name="health" /><br><br>
+            <label>Damage:</label><br>
+            <input type="number" name="damage" /><br><br>
+            <label>Range:</label><br>
+            <input type="number" name="range" /><br><br>
+            <label>FlatArmor:</label><br>
+            <input type="number" name="flatArmor" /><br><br>
+            <label>PercentageArmor:</label><br>
+            <input type="text" name="perArmor" /><br><br>
+            <label>Copies:</label><br>
+            <input type="number" name="copies" /><br><br>
+            <input type="submit" value="Send" />
+        </form>
+    </div>
+</body>
+
+</html>
