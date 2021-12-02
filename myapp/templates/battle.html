@@ -14,7 +14,8 @@
 
 <body>
     <div class="container">
-        <h2>List of Players: </h2>
+        <h2>Battle Results: </h2>
+        {{if .Winner}}
         <b>Winner:</b>
         <ul type="circle">
             <li>Name: <b>{{ .Name}}</b> </li>
@@ -22,6 +23,7 @@
             <li>Status: <b>{{ .Status}}</b> </li>
             <br>
         </ul>
+        {{end}}
     </div>
 </body>
 
