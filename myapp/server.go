@@ -61,6 +61,34 @@ type PlayerInfo struct {
 	Players []Player
 }
 
+func (p *PlayerInfo) GetPlayerInfo(l *PlayerList) {
+	p.Players = make([]Player, len(l.Players))
+	for i := 0; i < len(l.Players); i++ {
+		p.Players[i].Index = i + 1
+		p.Players[i].Name = (*l.Players[i]).Name()
+		p.Players[i].Health = (*l.Players[i]).Health()
+		p.Players[i].Status = (*l.Players[i]).Status()
+	}
+}
+
+type WinnerInfo struct {
+	Winner bool
+	Name   string
+	Health string
+	Status string
+}
+
+func (winfo *WinnerInfo) GetWinnerInfo(winner *btl.Player) {
+	if winner == nil {
+		winfo.Winner = false
+	} else {
+		winfo.Winner = true
+		winfo.Name = (*winner).Name()
+		winfo.Health = (*winner).Health()
+		winfo.Status = (*winner).Status()
+	}
+}
+
 func main() {
 	p := &PlayerList{}
 
@@ -70,35 +98,18 @@ func main() {
 	http.Handle("/addplayer", p)
 
 	http.HandleFunc("/info", func(w http.ResponseWriter, _ *http.Request) {
-		data := PlayerInfo{
-			Players: make([]Player, len(p.Players)),
-		}
-		for i := 0; i < len(data.Players); i++ {
-			data.Players[i].Index = i + 1
-			data.Players[i].Name = (*p.Players[i]).Name()
-			data.Players[i].Health = (*p.Players[i]).Health()
-			data.Players[i].Status = (*p.Players[i]).Status()
-		}
-
+		var data *PlayerInfo = &PlayerInfo{}
+		data.GetPlayerInfo(p)
 		tmpl, _ := template.ParseFiles("templates/info.html")
 		tmpl.Execute(w, data)
 	})
 
 	http.HandleFunc("/battle", func(w http.ResponseWriter, _ *http.Request) {
 		winner := p.Battle()
-		if winner == nil {
-			fmt.Fprint(w, "No one survived!")
-		} else {
-			data := Player{
-				Index:  0,
-				Name:   (*winner).Name(),
-				Health: (*winner).Health(),
-				Status: (*winner).Status(),
-			}
-
-			tmpl, _ := template.ParseFiles("templates/battle.html")
-			tmpl.Execute(w, data)
-		}
+		var data *WinnerInfo
+		data.GetWinnerInfo(winner)
+		tmpl, _ := template.ParseFiles("templates/battle.html")
+		tmpl.Execute(w, data)
 	})
 
 	http.HandleFunc("/styles.css", func(w http.ResponseWriter, r *http.Request) {
